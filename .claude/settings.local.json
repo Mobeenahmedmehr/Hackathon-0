@@ -1,0 +1,19 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(dir README.md)",
+      "Bash(dir AGENTS.md)",
+      "Bash(python -c \"import watchdog; print\\(''watchdog is available''\\)\")",
+      "Bash(pip install watchdog)",
+      "Bash(python -c \"import time, logging, pathlib, os, sys, mimetypes; from watchdog.observers import Observer; from watchdog.events import FileSystemEventHandler; import shutil; from datetime import datetime; print\\(''All imports successful''\\)\")",
+      "Bash(python test_orchestrator.py)",
+      "Bash(python -c \"from filesystem_watcher import DropFolderHandler; print\\(''File system watcher imports successfully''\\)\")",
+      "Bash(python -c \"from orchestrator import AI_Employee_Orchestrator; print\\(''Orchestrator imports successfully''\\)\")",
+      "Bash(del \"tmpclaude-*\" /q)",
+      "Bash(dir:*)",
+      "Bash(powershell \"Get-ChildItem -Path ''.\\\\Drafts\\\\''\")",
+      "Bash(powershell \"Get-ChildItem -Path ''.\\\\Approved\\\\'' -ErrorAction SilentlyContinue\")",
+      "Bash(powershell \"Move-Item -Path ''.\\\\Needs_Action\\\\SILVER_RALPH_TEST.md'' -Destination ''.\\\\Done\\\\SILVER_RALPH_TEST_COMPLETED.md''\")"
+    ]
+  }
+}
