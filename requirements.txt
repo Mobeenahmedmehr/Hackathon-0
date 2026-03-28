@@ -1,0 +1,46 @@
+# Core dependencies
+requests>=2.31.0
+python-dotenv>=1.0.0
+psutil>=5.9.6
+
+# Google APIs
+google-api-python-client>=2.118.0
+google-auth>=2.27.0
+google-auth-oauthlib>=1.1.1
+google-auth-httplib2>=0.1.1
+
+# Web automation
+playwright>=1.40.0
+selenium>=4.15.0
+
+# Scheduling
+schedule>=1.2.0
+
+# Data processing
+pandas>=2.1.0
+numpy>=1.24.0
+
+# Document processing
+openpyxl>=3.1.2
+pypdf>=3.17.1
+python-docx>=0.8.11
+python-pptx>=0.6.23
+PyYAML>=6.0.1
+
+# Image processing
+Pillow>=10.0.0
+pdf2image>=1.16.3
+
+# Web parsing
+beautifulsoup4>=4.12.2
+lxml>=4.9.3
+
+# Security
+defusedxml>=0.7.1
+
+# Type hints and validation
+pydantic>=2.5.0
+typing-extensions>=4.8.0
+
+# Progress bars and utilities
+tqdm>=4.66.1

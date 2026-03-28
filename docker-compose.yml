@@ -1,0 +1,34 @@
+version: '3.8'
+
+services:
+  ai_employee_app:
+    build: .
+    container_name: ai_employee_system
+    restart: unless-stopped
+    env_file:
+      - .env
+    volumes:
+      - ./Logs:/app/Logs
+      - ./Needs_Action:/app/Needs_Action
+      - ./Plans:/app/Plans
+      - ./Pending_Approval:/app/Pending_Approval
+      - ./Approved:/app/Approved
+      - ./Done:/app/Done
+      - ./Drafts:/app/Drafts
+      - ./Reports:/app/Reports
+      - ./Watchers:/app/Watchers
+      - ./ai:/app/ai
+      - ./core:/app/core
+      - ./config:/app/config
+      - ./mcp_servers:/app/mcp_servers
+      - ./security:/app/security
+      - ./auditor:/app/auditor
+      - ./dashboard:/app/dashboard
+    environment:
+      - PYTHONUNBUFFERED=1
+    networks:
+      - ai_employee_network
+
+networks:
+  ai_employee_network:
+    driver: bridge

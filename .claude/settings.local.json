@@ -13,7 +13,19 @@
       "Bash(dir:*)",
       "Bash(powershell \"Get-ChildItem -Path ''.\\\\Drafts\\\\''\")",
       "Bash(powershell \"Get-ChildItem -Path ''.\\\\Approved\\\\'' -ErrorAction SilentlyContinue\")",
-      "Bash(powershell \"Move-Item -Path ''.\\\\Needs_Action\\\\SILVER_RALPH_TEST.md'' -Destination ''.\\\\Done\\\\SILVER_RALPH_TEST_COMPLETED.md''\")"
+      "Bash(powershell \"Move-Item -Path ''.\\\\Needs_Action\\\\SILVER_RALPH_TEST.md'' -Destination ''.\\\\Done\\\\SILVER_RALPH_TEST_COMPLETED.md''\")",
+      "Bash(python:*)",
+      "Bash(pip install:*)",
+      "Bash(PYTHONPATH=. python utils/health_check.py)",
+      "Bash(C:UsersMTProjects claudeHACKATHON_0AI_Employee_Vaultlogging_setup.py)",
+      "Bash(PYTHONPATH=. python tests/test_auditor.py)",
+      "Bash(ls:*)",
+      "Bash(bash scripts/setup.sh)",
+      "Bash(find . -name \"*.py\" -exec grep -hE \"^import |^from \" {})",
+      "Bash(find . -name \"*.py\" -exec grep -hE \"^import [a-zA-Z]\" {})",
+      "Bash(find . -name \"*.py\" -exec grep -hE \"^from [a-zA-Z]\" {})",
+      "Bash(grep -E \"^\\(bs4|defusedxml|dotenv|email|google|googleapiclient|pdf2image|PIL|pptx|pypdf|requests|schedule|psutil|openpyxl|yaml\\)$|dotenv|openpyxl|PIL|pdf2image|pypdf|googleapiclient|bs4|pptx|schedule|psutil|yaml\")",
+      "Bash(playwright install:*)"
     ]
   }
 }

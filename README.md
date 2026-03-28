@@ -1,8 +1,18 @@
-# Personal AI Employee - Platinum Tier
+# AI Employee Vault - Platinum Tier
 
 **Role: Personal Operations Assistant**
 
 An advanced semi-autonomous Digital FTE that automates routine tasks through file-based workflows with full autonomy, comprehensive auditing, and multi-domain coordination capabilities. Features Platinum Tier Cloud + Local split architecture with zero-trust model.
+
+## Documentation
+
+Complete system documentation is available in the following files:
+
+- `SYSTEM_OVERVIEW.md` - High-level system overview and architecture
+- `COMPONENT_DETAILS.md` - Detailed component specifications
+- `WORKFLOW_SAFETY.md` - Workflow processes and safety mechanisms
+- `IMPLEMENTATION_GUIDE.md` - Setup and deployment instructions
+- `DOCUMENTATION_SUMMARY.md` - Concise summary of the entire system
 
 ## Judge Checklist
 

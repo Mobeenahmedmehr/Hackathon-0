@@ -1,0 +1,10 @@
+# Core requirements for AI Employee LinkedIn Poster
+playwright>=1.40.0
+Pillow>=10.0.0
+schedule>=1.2.0
+python-dotenv>=1.0.0
+
+# Core project dependencies
+requests>=2.31.0
+aiohttp>=3.9.0
+pydantic>=2.5.0

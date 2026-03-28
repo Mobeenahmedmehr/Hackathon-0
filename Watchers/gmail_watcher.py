@@ -1,169 +1,250 @@
-"""
-Gmail Watcher for AI Employee Silver Tier
-Monitors Gmail inbox for new emails and creates structured task files in Needs_Action.
-"""
-
+import os
 import time
+import base64
 import json
 from datetime import datetime
-from pathlib import Path
+from email.mime.text import MIMEText
+from email.mime.multipart import MIMEMultipart
+import google.auth
+from googleapiclient.discovery import build
+from google.oauth2.credentials import Credentials
+from google.auth.transport.requests import Request
+import logging
+
+from config.config_loader import load_config
+from utils.paths import get_needs_action_path
+from logging_setup import get_logger
+from .email_parser import parse_email_payload
 
 
-class GmailWatcher:
+def authenticate_gmail():
     """
-    A Gmail watcher for the AI Employee Silver Tier.
-    Simulates monitoring a Gmail inbox and creates task files in Needs_Action when new emails are detected.
-    NOTE: This is a simulation that creates sample emails to demonstrate the concept.
-    In a real implementation, this would connect to Gmail API.
+    Authenticate with Gmail API using OAuth credentials from environment variables.
     """
+    logger = get_logger(__name__)
 
-    def __init__(self, needs_action_dir="Needs_Action", logs_dir="Logs"):
-        self.needs_action_dir = Path(needs_action_dir)
-        self.logs_dir = Path(logs_dir)
+    # Load credentials from environment variables
+    client_id = os.getenv('GMAIL_CLIENT_ID')
+    client_secret = os.getenv('GMAIL_CLIENT_SECRET')
+    refresh_token = os.getenv('GMAIL_REFRESH_TOKEN')
 
-        # Create directories if they don't exist
-        self.needs_action_dir.mkdir(exist_ok=True)
-        self.logs_dir.mkdir(exist_ok=True)
+    if not client_id or not client_secret or not refresh_token:
+        raise ValueError("Missing Gmail OAuth credentials in environment variables")
 
-        # Track emails that have already been processed
-        self.processed_emails = set()
-        self.load_processed_emails()
+    # Create credentials object
+    creds = Credentials(
+        token=None,  # We'll use the refresh token to get a new access token
+        refresh_token=refresh_token,
+        token_uri='https://oauth2.googleapis.com/token',
+        client_id=client_id,
+        client_secret=client_secret
+    )
 
-        # Simulate email data for demonstration
-        self.simulated_emails = [
-            {
-                "id": "email_001",
-                "subject": "Project Update Request",
-                "sender": "manager@company.com",
-                "timestamp": "2026-02-04T10:30:00Z",
-                "body": "Hi, please provide an update on the quarterly project. Include budget status and timeline projections."
-            },
-            {
-                "id": "email_002",
-                "subject": "Meeting Follow-up",
-                "sender": "colleague@company.com",
-                "timestamp": "2026-02-04T11:15:00Z",
-                "body": "Following up on our meeting yesterday. Could you please send the presentation materials and action items?"
+    # Build the Gmail service
+    try:
+        service = build('gmail', 'v1', credentials=creds)
+        logger.info("Successfully authenticated with Gmail API")
+        return service
+    except Exception as e:
+        logger.error(f"Failed to authenticate with Gmail API: {str(e)}")
+        raise
+
+
+def fetch_unread_emails(service):
+    """
+    Fetch unread emails from Gmail.
+
+    Args:
+        service: Authenticated Gmail service object
+
+    Returns:
+        List of dictionaries containing email information
+    """
+    logger = get_logger(__name__)
+
+    try:
+        # Query for unread emails
+        results = service.users().messages().list(
+            userId='me',
+            q='is:unread'
+        ).execute()
+
+        messages = results.get('messages', [])
+        emails = []
+
+        for message in messages:
+            msg_id = message['id']
+
+            # Get the full message
+            msg = service.users().messages().get(
+                userId='me',
+                id=msg_id
+            ).execute()
+
+            # Extract email parts
+            headers = msg['payload']['headers']
+            sender = next((header['value'] for header in headers if header['name'].lower() == 'from'), 'Unknown')
+            subject = next((header['value'] for header in headers if header['name'].lower() == 'subject'), 'No Subject')
+
+            # Extract timestamp
+            timestamp_raw = next((header['value'] for header in headers if header['name'].lower() == 'date'), '')
+            try:
+                # Convert Gmail timestamp to readable format
+                timestamp = datetime.fromtimestamp(int(msg['internalDate'])/1000).strftime('%Y-%m-%d %H:%M:%S')
+            except:
+                timestamp = timestamp_raw
+
+            # Extract body text
+            body_text = parse_email_payload(msg['payload'])
+
+            email_data = {
+                'email_id': msg_id,
+                'sender': sender,
+                'subject': subject,
+                'body_text': body_text,
+                'timestamp': timestamp
             }
-        ]
 
-    def load_processed_emails(self):
-        """Load the set of already processed emails from a tracking file"""
-        tracker_file = self.logs_dir / ".processed_emails_tracker"
-        if tracker_file.exists():
-            with open(tracker_file, 'r') as f:
-                self.processed_emails = set(line.strip() for line in f.readlines())
+            emails.append(email_data)
 
-    def save_processed_emails(self):
-        """Save the set of processed emails to a tracking file"""
-        tracker_file = self.logs_dir / ".processed_emails_tracker"
-        with open(tracker_file, 'w') as f:
-            for email_id in self.processed_emails:
-                f.write(f"{email_id}\n")
+        logger.info(f"Fetched {len(emails)} unread emails")
+        return emails
 
-    def log_event(self, message):
-        """Log an event to the system log"""
-        timestamp = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
-        log_entry = f"[{timestamp}] GMAIL_WATCHER: {message}\n"
+    except Exception as e:
+        logger.error(f"Failed to fetch unread emails: {str(e)}")
+        return []
 
-        log_file = self.logs_dir / "gmail_watcher.log"
-        with open(log_file, 'a') as f:
-            f.write(log_entry)
 
-    def create_task_file(self, email_data):
-        """Create a structured task file in Needs_Action based on the detected email"""
-        # Create a unique task filename
-        timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
-        task_filename = f"gmail_task_{timestamp}_{email_data['id']}.md"
-        task_path = self.needs_action_dir / task_filename
+def create_task_file(email_data):
+    """
+    Create a markdown task file from email data.
 
-        # Create structured task content
-        task_content = f"""# Task: Process Email "{email_data['subject']}"
+    Args:
+        email_data: Dictionary containing email information
+    """
+    logger = get_logger(__name__)
 
-## Source
-- Email ID: `{email_data['id']}`
-- Sender: `{email_data['sender']}`
-- Subject: `{email_data['subject']}`
-- Received: `{email_data['timestamp']}`
+    # Create the markdown content
+    task_content = f"""# Task
 
-## Email Content
-{email_data['body']}
+Source: Gmail
+Sender: {email_data['sender']}
+Timestamp: {email_data['timestamp']}
 
-## Instructions
-Process the following email content and take appropriate action:
-
-```
-From: {email_data['sender']}
 Subject: {email_data['subject']}
-Date: {email_data['timestamp']}
 
-{email_data['body']}
-```
-
-## Expected Outcomes
-- Analyze the email content
-- Determine appropriate response or action
-- Generate necessary documents or reports if requested
-- Update dashboard with results
-
-## Metadata
-- Priority: Normal
-- Type: Email Processing
-- Source: Gmail Watcher
-- Classification: Need to respond to email request
+Message:
+{email_data['body_text']}
 """
 
-        # Write the task file
+    # Define the file path
+    task_filename = f"email_{email_data['email_id']}.md"
+    task_path = os.path.join(get_needs_action_path(), task_filename)
+
+    # Write the task file
+    try:
         with open(task_path, 'w', encoding='utf-8') as f:
             f.write(task_content)
 
-        self.log_event(f"Created task file '{task_filename}' for email '{email_data['subject']}'")
+        logger.info(f"Created task file: {task_path}")
         return task_path
+    except Exception as e:
+        logger.error(f"Failed to create task file {task_path}: {str(e)}")
+        raise
 
-    def simulate_check_new_emails(self):
-        """Simulate checking for new emails (in real implementation, this would use Gmail API)"""
-        new_emails = []
 
-        for email in self.simulated_emails:
-            if email['id'] not in self.processed_emails:
-                # Check if it's a "recent" email (for demo purposes, all are recent)
-                new_emails.append(email)
+def mark_email_as_read(service, email_id):
+    """
+    Mark an email as read by removing the 'UNREAD' label.
 
-        return new_emails
+    Args:
+        service: Authenticated Gmail service object
+        email_id: ID of the email to mark as read
+    """
+    logger = get_logger(__name__)
 
-    def run(self, interval=30):
-        """
-        Main loop for the Gmail watcher
-        :param interval: Time in seconds between email checks
-        """
-        self.log_event("Gmail watcher started")
+    try:
+        # Remove the UNREAD label from the email
+        service.users().messages().modify(
+            userId='me',
+            id=email_id,
+            body={'removeLabelIds': ['UNREAD']}
+        ).execute()
 
+        logger.info(f"Marked email {email_id} as read")
+    except Exception as e:
+        logger.error(f"Failed to mark email {email_id} as read: {str(e)}")
+
+
+def process_new_emails():
+    """
+    Main pipeline to process new emails:
+    1. Authenticate with Gmail
+    2. Fetch unread emails
+    3. Convert each email to task file
+    4. Mark emails as read
+    5. Log results
+    """
+    logger = get_logger(__name__)
+
+    try:
+        # Authenticate with Gmail
+        service = authenticate_gmail()
+
+        # Fetch unread emails
+        emails = fetch_unread_emails(service)
+
+        processed_count = 0
+
+        for email_data in emails:
+            try:
+                # Check if task file already exists to prevent duplicates
+                task_filename = f"email_{email_data['email_id']}.md"
+                task_path = os.path.join(get_needs_action_path(), task_filename)
+
+                if os.path.exists(task_path):
+                    logger.info(f"Task file already exists for email {email_data['email_id']}, skipping...")
+                    continue
+
+                # Create task file
+                create_task_file(email_data)
+
+                # Mark email as read
+                mark_email_as_read(service, email_data['email_id'])
+
+                processed_count += 1
+
+            except Exception as e:
+                logger.error(f"Failed to process email {email_data['email_id']}: {str(e)}")
+
+        logger.info(f"Processed {processed_count} new emails")
+
+    except Exception as e:
+        logger.error(f"Error in process_new_emails: {str(e)}")
+
+
+def run_watcher_loop():
+    """
+    Continuously check Gmail every 60 seconds.
+    """
+    logger = get_logger(__name__)
+
+    logger.info("Starting Gmail watcher loop...")
+
+    while True:
         try:
-            while True:
-                new_emails = self.simulate_check_new_emails()
-
-                for email in new_emails:
-                    try:
-                        self.create_task_file(email)
-                        self.processed_emails.add(email['id'])
-                    except Exception as e:
-                        self.log_event(f"Error processing email '{email['id']}': {str(e)}")
-
-                if new_emails:
-                    self.save_processed_emails()
-
-                time.sleep(interval)
-
+            process_new_emails()
+            time.sleep(60)  # Wait 60 seconds before next check
         except KeyboardInterrupt:
-            self.log_event("Gmail watcher stopped by user")
+            logger.info("Gmail watcher stopped by user")
+            break
         except Exception as e:
-            self.log_event(f"Unexpected error in Gmail watcher: {str(e)}")
+            logger.error(f"Error in watcher loop: {str(e)}")
+            time.sleep(60)  # Wait before retrying
 
 
 if __name__ == "__main__":
-    watcher = GmailWatcher()
     print("Starting AI Employee Gmail Watcher...")
     print("Monitoring Gmail for new emails...")
-    print("(This is a simulation - in production, this would connect to Gmail API)")
     print("Press Ctrl+C to stop")
-    watcher.run()
+    run_watcher_loop()

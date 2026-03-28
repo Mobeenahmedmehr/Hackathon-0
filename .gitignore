@@ -1,0 +1,45 @@
+# Environment variables
+.env
+.env.local
+.env.production
+
+# Logs
+Logs/
+logs/
+
+# Sessions
+sessions/
+
+# Cache
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+.Python
+*.so
+
+# Virtual environments
+venv/
+env/
+ENV/
+
+# Temporary files
+tmp*/
+*.tmp
+*.temp
+
+# IDE files
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# OS generated files
+.DS_Store
+Thumbs.db
+
+# Credentials
+*.key
+*.pem
+*.crt
+*.cert
