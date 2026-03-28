@@ -1,191 +1,192 @@
-# AI Employee Vault - Platinum Tier
+# AI Employee System
 
-**Role: Personal Operations Assistant**
+**An Advanced AI-Powered Digital Employee for Automated Task Management**
 
-An advanced semi-autonomous Digital FTE that automates routine tasks through file-based workflows with full autonomy, comprehensive auditing, and multi-domain coordination capabilities. Features Platinum Tier Cloud + Local split architecture with zero-trust model.
+A sophisticated AI employee system that monitors external sources, processes tasks autonomously, and executes actions with human oversight for safety. Built around a filesystem-based workflow that enables persistent, auditable operations across multiple domains.
 
-## Documentation
+## Overview
 
-Complete system documentation is available in the following files:
+The AI Employee System is designed to:
 
-- `SYSTEM_OVERVIEW.md` - High-level system overview and architecture
-- `COMPONENT_DETAILS.md` - Detailed component specifications
-- `WORKFLOW_SAFETY.md` - Workflow processes and safety mechanisms
-- `IMPLEMENTATION_GUIDE.md` - Setup and deployment instructions
-- `DOCUMENTATION_SUMMARY.md` - Concise summary of the entire system
+- Monitor Gmail, WhatsApp, and other communication channels
+- Detect leads, tasks, and opportunities automatically
+- Convert detected items into structured markdown tasks
+- Generate detailed action plans using AI reasoning
+- Request human approval for sensitive operations
+- Execute actions using secure MCP tools
+- Maintain comprehensive logs for auditing and compliance
 
-## Judge Checklist
+## Architecture
 
-To verify the system functionality, confirm:
-
-✅ **Autonomy exists** - System processes tasks without constant human intervention
-✅ **Control exists** - Human-in-the-Loop enforces approval for sensitive operations
-✅ **Recovery exists** - Error handling with retry logic and quarantine procedures
-✅ **Audits exist** - Comprehensive logging of all operations with timestamps
-✅ **Demo is reproducible** - Follow the demo steps in `/Demo/END_TO_END_DEMO.md`
-
-## Platinum Tier Scope
-
-This implementation provides an advanced AI employee with the following capabilities:
-
-- **Cloud + Local Split Architecture**: Separates reasoning (Cloud) from execution (Local) using zero-trust model
-- **Full Autonomy Loop**: Persistent multi-step execution with intelligent retry and state verification
-- **Multi-Domain Integration**: Coordinates across Communication, Operations, and Accounting/Tracking domains
-- **Dual MCP Servers**: Email draft and browser/form interaction MCP servers
-- **Advanced Error Handling**: Classifies and recovers from transient, auth, logic, and system errors
-- **Comprehensive Auditing**: Every action produces audit entries with timestamp, action, input, output, and approval status
-- **Weekly Business Audits**: Automated system health analysis and CEO-style briefings
-- **Enhanced Human-in-the-Loop**: Stronger approval requirements for new recipients, large actions, and cross-domain operations
-- **Advanced Agent Skills**: Specialized skills for failure recovery, audit generation, cross-domain planning, and state verification
-- **Claim-by-Move Ownership**: Tasks claimed by moving to agent-specific in-progress directories
-- **File-State-Based Completion**: Verifies completion using file-state rather than text claims
-- **Cryptographic Plan Verification**: All plans are signed and verified to prevent tampering
-- **Zero-Trust Enforcement**: Strict boundaries between Cloud and Local components
-
-## Architecture Overview
-
-The AI employee follows a Watcher → Reasoning → Approval → Action pattern with enhanced autonomy:
+The system follows a state-based workflow architecture:
 
 ```
-[Inbox] → [Claim by Move] → [In_Progress/<agent>] → [Process with State Verification] → [Done/Quarantined]
-    ↓              ↓                    ↓                          ↓                      ↓
-[Watchers] → [Skills] → [Dual MCP Servers] → [Cross-Domain Coordination] → [Audit & Recovery]
-     ↓
-[Gmail, etc.]
+Watchers → Needs_Action → Plans → Pending_Approval → Approved → Execution → Done
 ```
 
-### Components:
+### Core Workflow Folders:
 
-1. **Watchers**: Monitor multiple sources (File System, Gmail) and create task files
-2. **Skills**: Claude Agent Skills that perform specific functions
-3. **Gold Task Processor**: Persistent autonomous loop with error handling and recovery
-4. **Approval System**: Enhanced human-in-the-loop for sensitive actions
-5. **Dual MCP Servers**: Email draft and browser/form interaction MCP servers
-6. **Cross-Domain Planner**: Coordinates multi-domain operations
-7. **Audit System**: Comprehensive audit logging and weekly business analysis
-8. **Recovery System**: Error classification, retry logic, and quarantine procedures
+- **Needs_Action/** - Incoming tasks detected by watchers
+- **Plans/** - AI-generated action plans with tool selections
+- **Pending_Approval/** - Plans awaiting human authorization
+- **Approved/** - Verified plans ready for execution
+- **Rejected/** - Plans declined by human operator
+- **Drafts/** - Prepared content awaiting final approval
+- **Done/** - Successfully completed tasks
+- **Logs/** - Comprehensive system activity logs
+- **Reports/** - Weekly audit and analytics reports
 
-## Enhanced Folder Structure
+### System Modules:
 
-- `/Inbox/` - Files placed here are monitored for new tasks
-- `/Needs_Action/` - Task files awaiting processing
-- `/In_Progress/` - Tasks claimed by agents (subdirectories by agent name)
-- `/Pending_Approval/` - Tasks requiring human approval
-- `/Approved/` - Tasks approved for execution
-- `/Rejected/` - Tasks rejected by human operator
-- `/Drafts/` - Drafted actions awaiting approval (emails, messages, browser interactions)
-- `/Done/` - Completed tasks are moved here
-- `/Plans/` - Strategic plans generated by the AI
-- `/Quarantined/` - Failed tasks requiring review
-- `/Reports/` - Generated reports and weekly audits
-- `/Logs/` - System logs and activity records (with date-based naming)
-- `/Skills/` - Claude Agent Skills for various functions
-- `/Watchers/` - Monitoring scripts for various sources
-- `/Docs/` - Documentation and guides
-- `/Cloud/Incoming_Tasks/` - Tasks routed to Cloud Planner Agent for reasoning
-- `/Cloud/Signed_Plans/` - Cryptographically signed plans from Cloud Planner
-- `/Local/Needs_Action/` - Plans routed to Local Executor Agent for execution
-- `/Local/Executed_Actions/` - Successfully executed plans
-- `/Local/Invalid_Plans/` - Plans that failed signature verification
+- **watchers/** - Source monitoring (Gmail, WhatsApp, etc.)
+- **ai/** - AI reasoning and plan generation modules
+- **core/** - Main orchestration and workflow management
+- **mcp_servers/** - Secure action execution tools
+- **security/** - Cryptographic verification and access controls
+- **auditor/** - Reporting and compliance auditing
+- **dashboard/** - System monitoring interface
+- **config/** - Environment configuration and credentials
+- **agents/** - AI agent implementations
+- **integrations/** - External service connectors
+- **utils/** - Utility functions and helpers
 
-## Platinum Tier Features
+## Key Features
 
-✅ **Cloud + Local Split** - Separation of reasoning (Cloud) and execution (Local)
-✅ **Zero-Trust Model** - Strict boundaries between components
-✅ **Plan Verification** - All plans signed and verified cryptographically
-✅ **Persistent Loop** - Continuous operation with retry and recovery
-✅ **Multi-Domain Support** - Coordination across Communication, Operations, and Accounting
-✅ **Error Handling** - Classification and recovery for various error types
-✅ **Comprehensive Auditing** - Full logging with timestamps and context
-✅ **Human Oversight** - Approval required for sensitive operations
-✅ **Task Ownership** - Prevents double-processing
-✅ **State Verification** - Completion verified through file-state
+### 🤖 Autonomous Operation
 
-## Safety Boundaries
+- Automatic detection of tasks and leads from multiple sources
+- AI-powered plan generation with appropriate tool selection
+- Persistent operation with state management
+- Intelligent retry and error handling
 
-The system implements strict safety boundaries:
+### 🔐 Safety & Control
 
-- **NO payments** - No financial transactions without approval
-- **NO auto-sending** - Messages remain as drafts until approved
-- **NO irreversible actions** - Critical operations require approval
-- **No bypass paths** - All safety measures are mandatory
-- **Comprehensive auditing** - Every action is logged
-- **State verification** - Completion verified through file-state
+- Mandatory human approval for sensitive operations
+- Cryptographic plan signing and verification
+- Comprehensive logging of all activities
+- Strict safety boundaries preventing unauthorized actions
 
-## How to Run Demo
+### 📊 Auditing & Compliance
 
-1. **Place a task in the Inbox:**
-   ```bash
-   echo "# Demo Task
+- Complete audit trails for all operations
+- Weekly business reports and system health analysis
+- Timestamped logs of all inputs, outputs, and decisions
+- Chain of custody tracking for all processed items
 
-   ## Instructions
-   Create a summary of system operations and send notification to team@example.com
+### 🌐 Multi-Domain Integration
 
-   ## Priority
-   Medium
-   " > Inbox/demo_task_$(date +%s).md
-   ```
+- Cross-platform monitoring (Gmail, WhatsApp, LinkedIn)
+- Multi-channel communication capabilities
+- Integration with external services via MCP tools
+- Coordinated multi-step operations
 
-2. **Start the complete system:**
-   ```bash
-   python run_platinum_tier.py
-   ```
+## Safety Framework
 
-3. **Observe the flow:**
-   - Task moves to `/Cloud/Incoming_Tasks/` for planning
-   - Signed plan appears in `/Cloud/Signed_Plans/`
-   - Approval request created in `/Pending_Approval/` (due to email)
-   - Move to `/Approved/` to continue
-   - Final output in `/Done/` and `/Local/Executed_Actions/`
+The system implements robust safety measures:
 
-4. **Monitor progress:**
-   - Check `/Dashboard.md` for status updates
-   - Review audit logs in `/Logs/gold_audit_YYYYMMDD.log`
-   - Verify file transitions through the system
+1. **Approval Requirements** - All sensitive operations require explicit human authorization
+2. **Immutable Logging** - Every action is recorded in the Logs/ directory
+3. **Credential Security** - Sensitive credentials stored only in environment variables
+4. **Plan Verification** - All action plans are cryptographically signed and verified
+5. **Error Isolation** - Failed tasks move to quarantine for review and prevent infinite loops
 
-5. **Follow the complete demo:**
-   - See `/Demo/END_TO_END_DEMO.md` for detailed walkthrough
-   - Use `/Docs/HACKATHON_CHECKLIST.md` for verification steps
+## Getting Started
 
-## Safety Guarantees
-
-The Platinum Tier system implements multiple layers of safety controls:
-
-### Autonomous Operation with Human Oversight
-- **Auto-Processing:** Routine tasks execute automatically
-- **Human-in-the-Loop:** Sensitive operations require approval
-- **Approval Triggers:** Payments, email sending, deletions, new recipients
-
-### Zero-Trust Architecture
-- **Cloud-Local Separation:** Reasoning vs. Execution split
-- **Cryptographic Verification:** All plans signed and verified
-- **Boundary Enforcement:** Strict access controls between components
-
-### Comprehensive Auditing
-- **Full Logging:** Every action logged with timestamp, input, output
-- **Chain of Custody:** Complete audit trail for compliance
-- **Error Tracking:** All failures logged and retried appropriately
-
-### Recovery Mechanisms
-- **Retry Logic:** Failed operations automatically retried
-- **Quarantine System:** Problematic content isolated
-- **State Verification:** File-based completion checking
-
-### Operational Safeguards
-- **No Auto-Sending:** Messages remain as drafts until approved
-- **No Unauthorized Actions:** Strict policy enforcement
-- **No Bypass Paths:** All safety measures are mandatory
-
-## Requirements
+### Prerequisites
 
 - Python 3.7+
-- Local file system access
-- Markdown processing capabilities
+- Access to external service APIs (Gmail, WhatsApp, etc.)
+- MCP server configurations for action execution
+- Environment variables for API keys and credentials
 
-## Security Model
+### Setup
 
-- All operations are file-based and local
-- No external data transmission
-- All actions are logged in `/Logs/`
-- Critical actions require human approval
-- Drafts created but not sent automatically
+1. Clone the repository
+2. Install dependencies: `pip install -r requirements.txt`
+3. Configure environment variables in `.env` file
+4. Set up MCP server connections
+5. Start the system: `python run_ai_employee.py`
+
+### Running the System
+
+```bash
+# Start the main orchestrator
+python core/orchestrator.py
+
+# Monitor the dashboard
+tail -f dashboard/status.md
+
+# Check logs
+tail -f Logs/system_$(date +%Y%m%d).log
+```
+
+## Project Structure
+
+```
+AI_Employee_Vault/
+├── Needs_Action/          # Incoming detected tasks
+├── Plans/                 # AI-generated action plans
+├── Pending_Approval/      # Plans awaiting human approval
+├── Approved/              # Authorized plans for execution
+├── Rejected/              # Declined plans
+├── Drafts/                # Prepared content awaiting approval
+├── Done/                  # Successfully completed tasks
+├── Logs/                  # System activity logs
+├── Reports/               # Audit and analytics reports
+├── Inbox/                 # Incoming communication monitoring
+├── watchers/              # External source monitoring
+├── ai/                    # AI reasoning modules
+├── core/                  # Main orchestration logic
+├── mcp_servers/           # Secure action execution tools
+├── security/              # Cryptographic and access controls
+├── auditor/               # Reporting and compliance tools
+├── dashboard/             # Monitoring interface
+├── config/                # System configuration
+├── agents/                # AI agent implementations
+├── integrations/          # External service connectors
+└── utils/                 # Utility functions
+```
+
+## Development
+
+### Adding New Watchers
+
+Create new watcher modules in the `watchers/` directory to monitor additional sources. Each watcher should:
+
+- Detect relevant events or communications
+- Create structured task files in the `Needs_Action/` directory
+- Handle authentication and API integration for the source
+
+### Extending MCP Servers
+
+Add new MCP server implementations in `mcp_servers/` to enable new types of actions. Each server should:
+
+- Implement secure interfaces to external systems
+- Include rate limiting and safety constraints
+- Handle authentication and session management
+
+### AI Plan Generation
+
+The AI module in `ai/` generates executable action sequences by:
+
+- Parsing incoming task requirements
+- Selecting appropriate tools and parameters
+- Creating detailed step-by-step execution plans
+- Ensuring all safety requirements are met
+
+## Contributing
+
+1. Fork the repository
+2. Create a feature branch (`git checkout -b feature/amazing-feature`)
+3. Make your changes
+4. Commit your changes (`git commit -m 'Add amazing feature'`)
+5. Push to the branch (`git push origin feature/amazing-feature`)
+6. Open a Pull Request
+
+## License
+
+This project is part of a hackathon submission and intended for demonstration purposes.
+
+## Contact
+
+For questions about the AI Employee System, please open an issue in the repository.
